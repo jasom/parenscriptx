@@ -5,19 +5,6 @@
 
 ;;; "parenscriptx" goes here. Hacks and glory await!
 
-(defun convert-name (name)
-  (with-output-to-string (s)
-    (loop
-       with state = :start
-       for char across (subseq name 1)
-       when (eql state :start)
-       do (write-char (char-upcase char) s)
-	 (setf state :middle)
-       else if (char= char #\-)
-       do (setf state :start)
-       else do (write-char (char-downcase char) s))))
-
-
 (defmethod cl-who:convert-tag-to-string-list :around ((tag symbol) attr body fns)
   (let* ((tn (symbol-name tag))
 	 (tnf (if (char= (elt tn 0) #\*)
