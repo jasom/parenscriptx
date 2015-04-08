@@ -12,3 +12,18 @@
   :components ((:file "package")
                (:file "parenscriptx")))
 
+(asdf:defsystem #:parenscriptx/example
+  :description "Example from React tutorial"
+  :author "Jason Miller <aidenn0@geocities.com>"
+  :license "MIT/X11"
+  :depends-on (#:parenscriptx
+	       #:cl-who
+	       #:parenscript
+               #:split-sequence
+	       #:cl-json
+	       #:hunchentoot)
+  :serial t
+  :components ((:module "example"
+			:components
+                        ((:file "package")
+                        (:file "code")))))
