@@ -5,52 +5,49 @@
 
 ;;; "parenscriptx" goes here. Hacks and glory await!
 
-(defmethod cl-who:convert-tag-to-string-list :around ((tag symbol) attr body fns)
-  (let* ((tn (symbol-name tag))
-	 (tnf (if (char= (elt tn 0) #\*)
-		  (ps::encode-js-identifier tn)
-		  (string-downcase tn)))
-	 (cl-who:*downcase-tokens-p* t)
-	 (attrs
-	  (loop for item in attr
-	     when (and (consp (cdr item)) (eql (second item) '{))
-	     collect (cons (ps::encode-js-identifier (string (car item))) 'placeholder)
-	     else collect (cons (ps::encode-js-identifier (string (car item))) (cdr item))))
-	 (cl-who:*downcase-tokens-p* nil)
-	 (result
-	  (call-next-method tnf attrs body fns)))
-  (loop
-     with braces = (remove-if-not
-		    (lambda (x) (and (consp (cdr x)) (eql (second x) '{)))
-		    attr)
-     for item in result
-     ;do (princ item) (terpri)
-     unless (and (consp item)
-		 (eql (car item) 'let)
-		 (eql (second (first (second item))) 'placeholder))
-     collect item
-     else
-       collect (format nil " ~A={" (ps::encode-js-identifier (string (caar braces)))) and
-     collect (with-output-to-string (parenscript::*psw-stream*)
-	       (parenscript::parenscript-print
-		(parenscript::compile-expression (third (pop braces))) t))
-       and collect "}")))
-       
+(defun split-tag-parts (tree)
+  (loop with tag = (car tree)
+     for rest on (cdr tree) by #'cddr
+     while (keywordp (car rest))
+     collect (ps::encode-js-identifier (string (car rest))) into attrs
+     collect (if (symbolp (cadr rest))
+		 (ps::encode-js-identifier (string (cadr rest)))
+		 (cadr rest))
+     into attrs
+     finally (return (values tag attrs rest))))
 
-(defmethod parenscript::ps-print% ((op (eql 'htm)) args)
-  (funcall (compile nil `(lambda ()
-		       (cl-who:with-html-output (parenscript::*psw-stream*) ,@args)))))
+(defun html-element-p (keyword)
+  (notany #'upper-case-p (ps::encode-js-identifier (string keyword))))
 
-(parenscript::define-expression-operator htm (&rest args) `(htm ,@args))
+(parenscript:defpsmacro htm (&body trees)
+  (if (> (length trees) 1)
+  `(progn ,@(mapcar #'psx-htm-item trees))
+  (psx-htm-item (car trees))))
 
-(defmacro { (&body b)
-  `(progn
-     (write-char #\{ parenscript::*psw-stream*)
-     (parenscript::parenscript-print
-      (parenscript::compile-expression ',(car b)) t)
-     (write-char #\} parenscript::*psw-stream*)))
+(defun psx-htm-item (tree)
+  (if (and (consp tree) (keywordp (car tree)))
+      (multiple-value-bind (tag attrs body)
+	  (split-tag-parts tree)
+	`(ps:chain
+	  *react
+	  (create-element
+	   ,(if (html-element-p tag)
+		(ps::encode-js-identifier (string tag))
+		(intern (string tag) *package*))
+	   (ps:create ,@attrs)
+	   ,@(loop for item in body
+		  collect `(htm ,item)))))
+      tree))
 
 (ps:defpsmacro defreact (name &rest args)
   `(ps:var ,name 
 	       (ps:chain *react (create-class (ps:create ,@args)))))
    
+
+;;; The following two macros are for backwards-compatibility
+;;; It used to be required that parenscript inside htm be
+;;; enclosed in a { macro.
+(parenscript:defpsmacro { (b) b)
+
+(parenscript:defpsmacro cl-who:esc (item)
+  item)
