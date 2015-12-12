@@ -35,10 +35,10 @@
 	 file)))
     (encode-json-list-to-string comments)))
 
-(hunchentoot:create-static-file-dispatcher-and-handler
- "css/base.css"
- (asdf:system-relative-pathname :parenscriptx/example "example/base.css")
- "text/css")
+(push (hunchentoot:create-static-file-dispatcher-and-handler
+       "/css/base.css"
+       (asdf:system-relative-pathname :parenscriptx/example "example/base.css")
+       "text/css") hunchentoot:*dispatch-table*)
 
 (hunchentoot:define-easy-handler (index :uri "/index.html") ()
   (with-html-output-to-string (stream nil :prologue "<!DOCTYPE html>")
@@ -46,14 +46,13 @@
      (:head
       (:title "Hello React")
       (:link :rel "stylesheet" :href "css/base.css")
-      (:script :src "https://cdnjs.cloudflare.com/ajax/libs/react/0.13.1/react.js")
-      (:script :src "https://cdnjs.cloudflare.com/ajax/libs/react/0.13.1/JSXTransformer.js")
+      (:script :src "https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react.js")
       (:script :src "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js")
+      (:script :src "https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react-dom.min.js")
       (:script :src "https://cdnjs.cloudflare.com/ajax/libs/showdown/0.3.1/showdown.min.js"))
      (:body
       (:div :id "content")
       (:script
-       :type "text/jsx;harmony=true"
        (ps-to-stream stream
 ;;; var converter = new Showdown.converter();
      (var *converter* (new (chain *showdown (converter))))
@@ -80,9 +79,9 @@
 		      :class-name "comment"
 		      (:h2
 		       :class-name "comment-author"
-		       ({ (@ this props author)))
+		       (@ this props author))
 		      (:span :dangerously-set-inner-h-t-m-l
-			     ({(create __html raw-markup))))))))
+			     (create __html raw-markup)))))))
 
 ;;;var CommentBox = React.createClass({
 ;;;                   loadCommentsFromServer: function() {
@@ -185,9 +184,9 @@
               (htm
                (:div :class-name "commentBox"
                  (:h1 "Comments")
-                 (:*comment-list :data ({(@ this state data)))
+                 (:*comment-list :data (@ this state data))
                  (:*comment-form :on-comment-submit
-                        ({(@ this handle-comment-submit)))))))
+                        (@ this handle-comment-submit))))))
 
 ;;;var CommentList = React.createClass({
 ;;;                    render: function() {
@@ -216,12 +215,12 @@
                         (map (lambda (comment index)
 			       (htm
 				(:*comment
-				 :author ({(@ comment author))
-				 :key ({ index)
-				 ({(@ comment text)))))))))
+				 :author (@ comment author)
+				 :key index
+				 (@ comment text))))))))
 		(htm
 		 (:div
-		  ({ comment-nodes))))))
+		  comment-nodes)))))
 
 ;;;var CommentForm = React.createClass({
 ;;;                    handleSubmit: function(e) {
@@ -264,7 +263,7 @@
 		  (htm
 		   (:form
 		    :class-name "commentForm"
-		    :on-submit ({(@ this handle-submit))
+		    :on-submit (@ this handle-submit)
 		    (:input :type "text"
 			    :placeholder "Your name"
 			    :ref "author")
@@ -278,8 +277,8 @@
 ;;;             document.getElementById('content')
 ;;;             );
 
-     (chain *React (render
+     (chain *React-d-o-m (render
 		    (htm
 		     (:*comment-box :url "comments.json"
-				    :poll-interval ({ 2000)))
+				    :poll-interval 2000))
 		    (chain document (get-element-by-id "content"))))))))))
