@@ -17,7 +17,6 @@ Hello World (:use parenscript parenscriptx cl-who):
        (:div :id "content")
        (:script
 	(ps-to-stream stream
-;;; var converter = new Showdown.converter();
 	  (defreact *hello-world
 	      render (lambda () (htm
 				 (:div (+ "Hello " (@ this props name) "!")))))
@@ -34,9 +33,12 @@ the convention of initial capital letters for react classes, and
 allows for HTML to introduce new element names without needing to
 update this library.
 
-Lastly ``defreact`` is a convenience wrapper for generating "var Foo = React.createClass(...)" forms; the body is alternating key/value pairs for the react object that is created.
+Lastly ``defreact`` is a convenience wrapper for generating "var Foo =
+React.createClass(...)" forms; the body is alternating key/value pairs for the
+react object that is created.
 
-There is `a more full-featured example using
-hunchentoot`__
+There is `a more full-featured example using hunchentoot`__; lines starting
+with ``;;;`` are the equivalent javascript code.  This is based off of what
+used to be the first tutorial on the react home page.
 
 __: example/code.lisp
