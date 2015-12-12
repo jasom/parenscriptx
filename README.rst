@@ -7,6 +7,7 @@ A simple tool for aiding with creating React UIs in parenscript
 Hello World (:use parenscript parenscriptx cl-who):
 
 .. code:: lisp
+
   (with-html-output-to-string (stream nil :prologue "<!DOCTYPE html>")
     (:html
      (:head
@@ -41,4 +42,4 @@ There is `a more full-featured example using hunchentoot`__; lines starting
 with ``;;;`` are the equivalent javascript code.  This is based off of what
 used to be the first tutorial on the react home page.
 
-__: example/code.lisp
+.. __: example/code.lisp
