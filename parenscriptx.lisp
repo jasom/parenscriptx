@@ -41,7 +41,7 @@
 
 (ps:defpsmacro defreact (name &rest args)
   `(ps:var ,name 
-	       (ps:chain *react (create-class (ps:create ,@args)))))
+	       (ps:chain *react (create-class (ps:create 'display-name ,(ps::encode-js-identifier (string name)) ,@args)))))
    
 
 ;;; The following two macros are for backwards-compatibility
