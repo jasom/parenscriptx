@@ -9,10 +9,10 @@
   (loop with tag = (car tree)
      for rest on (cdr tree) by #'cddr
      while (keywordp (car rest))
+     if (cadr rest)
      collect (ps::encode-js-identifier (string (car rest))) into attrs
-     collect (if (symbolp (cadr rest))
-		 (ps::encode-js-identifier (string (cadr rest)))
-		 (cadr rest))
+     and
+     collect (cadr rest)
      into attrs
      finally (return (values tag attrs rest))))
 
